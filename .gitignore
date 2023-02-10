@@ -1,0 +1,8 @@
+__pycache__/
+__pypackages__/
+*.json
+!webui/**/*.json
+*.pyc
+*.pickle
+db.sqlite
+cookies.txt

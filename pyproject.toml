@@ -1,0 +1,23 @@
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Matthew Newland", email = "matthewnnewland@gmail.com"},
+]
+dependencies = [
+    "starlite>=1.51.0",
+    "sqlalchemy>=2.0.3",
+    "passlib>=1.7.4",
+    "python-jose>=3.3.0",
+    "aiosqlite>=0.18.0",
+]
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+[tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "uvicorn>=0.20.0",
+    "alembic>=1.9.3",
+]
