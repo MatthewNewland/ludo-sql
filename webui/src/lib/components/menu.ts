@@ -1,0 +1,1 @@
+export const menuKey = Symbol()

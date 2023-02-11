@@ -1,5 +1,6 @@
 import { writable } from "svelte/store"
 import ky from "ky"
+import type { Options as KyOptions } from "ky"
 import { browser } from "$app/environment"
 
 export const apiClient = ky.create({
@@ -29,14 +30,13 @@ const createPageStore = () => {
     },
 
     async savePage(page: Page, parentId?: number) {
-      let searchParams = parentId
-        ? {
-            parent_id: parentId,
-          }
-        : {}
       const method = page.id ? "patch" : "post"
       const url = method === "post" ? "" : `${page.id!}`
-      await apiClient(url, { method, json: page, searchParams })
+      let options: KyOptions = { method, json: page }
+      if (parentId) {
+        options.searchParams = { parent_id: parentId }
+      }
+      await apiClient(url, options)
       await this.load()
     },
 
@@ -44,6 +44,15 @@ const createPageStore = () => {
       await apiClient.delete(`${page.id!}`)
       await this.load()
     },
+
+    async movePageToNewParent(page: Page, newParent: Page) {
+      const searchParams = {
+        parent_id: newParent.id!
+      }
+
+      await apiClient.put(`move/${page.id}`, { searchParams })
+      await this.load()
+    }
   }
 }
 

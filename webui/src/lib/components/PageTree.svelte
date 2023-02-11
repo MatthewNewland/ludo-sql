@@ -1,7 +1,10 @@
 <script lang="ts">
   import { page } from "$app/stores"
   import { pageStore, type PageWithChildren } from "$lib/store/page"
+  import { clipboard } from "$lib/store/clipboard"
   import Dialog from "./Dialog.svelte"
+  import ContextMenu from "./ContextMenu.svelte"
+
   let clazz: string = ""
   export { clazz as class }
   export let tree: PageWithChildren[]
@@ -15,6 +18,28 @@
       await pageStore.deletePage(pwc)
     }
   }
+
+  let menuPage: PageWithChildren
+  let contextMenu: ContextMenu
+
+  const handleTreeNodeContextMenu = (e: MouseEvent, pwc: PageWithChildren) => {
+    menuPage = pwc
+    contextMenu.showMenu(e)
+  }
+
+  const handleContextMenuCut = () => {
+    $clipboard.cutPage = menuPage
+    contextMenu.closeMenu()
+  }
+
+  const handleContextMenuPaste = () => {
+    contextMenu.closeMenu()
+    if (!$clipboard.cutPage) {
+      return
+    }
+
+    pageStore.movePageToNewParent($clipboard.cutPage, menuPage)
+  }
 </script>
 
 <ul class:ml-5={depth > 0} class="flex flex-col gap-1 w-full pr-4 {clazz}">
@@ -25,6 +50,7 @@
       ) === pwc.id
         ? 'font-bold bg-gray-300 dark:bg-slate-700'
         : ''}"
+      on:contextmenu|preventDefault={(e) => handleTreeNodeContextMenu(e, pwc)}
     >
       <div class="flex flex-row gap-2 items-center">
         {#if !!pwc.children.length}
@@ -65,3 +91,9 @@
 <Dialog bind:this={dialog}>
   <p>Are you sure you want to delete this page?</p>
 </Dialog>
+
+<ContextMenu
+  bind:this={contextMenu}
+  on:cut={handleContextMenuCut}
+  on:paste={handleContextMenuPaste}
+/>
