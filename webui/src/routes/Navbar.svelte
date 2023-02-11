@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores"
-  import { loggedIn } from "$lib/store/auth"
+  import { localSettings } from "$lib/store/settings"
 
   type LinkDef = {
     href: string
@@ -48,10 +48,16 @@
 </script>
 
 <nav
-  class="sticky top-0 z-10 bg-white py-6 border-b dark:bg-slate-900 dark:border-slate-800"
+  class="sticky top-0 z-10 bg-white p-6 border-b dark:bg-slate-900 dark:border-slate-800 flex flex-row items-center"
 >
+  <button
+    class="text-4xl material-icons"
+    on:click={() => ($localSettings.menuOpen = !$localSettings.menuOpen)}
+  >
+    menu
+  </button>
   <ul
-    class="flex flex-row justify-between md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1200px] mx-auto"
+    class="flex flex-row justify-between md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1200px] mx-auto w-full"
   >
     {#each startLinks as linkDef, i}
       <li>

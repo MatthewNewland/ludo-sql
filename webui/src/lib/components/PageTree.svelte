@@ -1,19 +1,18 @@
 <script lang="ts">
   import { page } from "$app/stores"
-  import type { PageWithChildren } from "$lib/store/page"
+  import { pageStore, type PageWithChildren } from "$lib/store/page"
+  import Dialog from "./Dialog.svelte"
   let clazz: string = ""
   export { clazz as class }
   export let tree: PageWithChildren[]
   export let depth = 0
   let expanded: boolean[] = tree.map(() => false)
+  let dialog: Dialog
 
   const handleDelete = async (pwc: PageWithChildren) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete this page? ${pwc.friendly_title} (id: ${pwc.id})`
-      )
-    ) {
-      return
+    const result = await dialog.prompt()
+    if (result) {
+      await pageStore.deletePage(pwc)
     }
   }
 </script>
@@ -62,3 +61,7 @@
     </li>
   {/each}
 </ul>
+
+<Dialog bind:this={dialog}>
+  <p>Are you sure you want to delete this page?</p>
+</Dialog>
