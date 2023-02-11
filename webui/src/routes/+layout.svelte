@@ -14,7 +14,7 @@
 <Navbar />
 <Sidebar />
 <main
-  class="mr-auto ml-auto md:ml-[22rem] md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1200px] 2xl:max-w-[1900px] py-6 h-full"
+  class="mr-auto ml-auto md:ml-[22rem] md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1200px] 3xl:max-w-[1900px] py-6 h-full"
 >
   <slot />
 </main>

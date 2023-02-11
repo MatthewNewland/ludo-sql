@@ -138,10 +138,18 @@ class PagesController(Controller):
         return page
 
     @delete("/{id:int}")
-    async def delete_page(self, id: int, session: AsyncSession, user: User) -> None:
+    async def delete_page(self, id: int, session: AsyncSession, user: User, force: bool = False) -> None:
         page = await session.get(Page, id)
         if page is None or page.author_id != user.id:
             raise NotFoundException()
+
+        # Check for children
+        children = await session.scalars(select(Page).where(Page.parent_id == id))
+        if children.first() is not None and not force:
+            raise HTTPException(
+                status_code=status_codes.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Attempting to delete page with children"
+            )
 
         await session.delete(page)
         await session.commit()
