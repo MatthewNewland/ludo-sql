@@ -58,13 +58,13 @@
   <footer class="absolute bottom-2">
     <slot name="actions">
       <button
-        class="px-2 py-1 bg-slate-600"
+        class="px-2 py-1 bg-slate-400 dark:bg-slate-600"
         on:click={() => resolve(false)}
       >
         Cancel
       </button>
       <button
-        class="px-2 py-1 bg-blue-600"
+        class="px-2 py-1 bg-blue-400 dark:bg-blue-600"
         on:click={() => resolve(true)}
       >
         OK

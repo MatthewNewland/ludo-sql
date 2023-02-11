@@ -5,7 +5,7 @@
 </script>
 
 <nav
-  class="absolute top-13 left-0 w-0 md:w-80 border-r h-full dark:border-slate-800 {$localSettings.menuOpen
+  class="absolute left-0 md:w-80 border-r h-full dark:border-slate-800 {$localSettings.menuOpen
     ? 'visible'
     : 'invisible'}"
 >
