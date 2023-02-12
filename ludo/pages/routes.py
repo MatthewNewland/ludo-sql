@@ -52,6 +52,12 @@ class PagesController(Controller):
         user_for_session = await session.get(User, user.id)
         page = Page(**data.dict())
 
+        if await session.get(Page, parent_id) is None:
+            raise HTTPException(
+                status_code=status_codes.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Parent ID does not exist"
+            )
+
         if page.title is None and page.friendly_title is None:
             raise HTTPException(
                 status_code=status_codes.HTTP_422_UNPROCESSABLE_ENTITY,
