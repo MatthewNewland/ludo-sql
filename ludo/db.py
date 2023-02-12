@@ -9,7 +9,7 @@ from starlite.plugins.sql_alchemy import (
 sqlalchemy_config = SQLAlchemyConfig(
     connection_string="sqlite+aiosqlite:///db.sqlite",
     dependency_key="session",
-    engine_config=SQLAlchemyEngineConfig(echo=True),
+    engine_config=SQLAlchemyEngineConfig(),
 )
 
 sqlalchemy_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)

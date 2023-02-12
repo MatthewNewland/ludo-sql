@@ -7,9 +7,13 @@ body {
 }
 
 input[type]:not([type="checkbox"]), textarea {
-  @apply dark:bg-slate-800 dark:text-slate-50;
+  @apply dark:bg-slate-800 dark:text-slate-50 rounded;
 }
 
 input[type="checkbox"] {
-  @apply dark:bg-slate-800 dark:text-teal-600;
+  @apply dark:bg-slate-800 dark:text-teal-600 rounded;
+}
+
+button {
+  @apply rounded shadow;
 }

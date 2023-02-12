@@ -4,10 +4,10 @@
   import { localSettings } from "$lib/store/settings"
 </script>
 
-<nav
+<aside
   class="absolute left-0 md:w-80 border-r h-full dark:border-slate-800 {$localSettings.menuOpen
     ? 'visible'
     : 'invisible'}"
 >
   <PageTree class="p-6 h-full" tree={$pageTree} />
-</nav>
+</aside>

@@ -88,7 +88,7 @@
   {/each}
 </ul>
 
-<Dialog bind:this={dialog}>
+<Dialog bind:this={dialog} class="w-1/3 h-1/4">
   <p>Are you sure you want to delete this page?</p>
 </Dialog>
 
