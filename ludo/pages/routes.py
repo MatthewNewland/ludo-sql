@@ -180,3 +180,10 @@ class PagesController(Controller):
             raise NotFoundException()
 
         return page
+
+    @get("/{id:int}/path")
+    async def get_page_path(self, id: int, session: AsyncSession) -> Path:
+        page = await session.get(Page, id)
+        if page is None:
+            raise NotFoundException()
+        return await page.get_path(session)

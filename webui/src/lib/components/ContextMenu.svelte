@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte"
   import type { Page } from "$lib/store/page"
-  import Menu from "./Menu.svelte"
+  import ContextMenuContent from "./ContextMenuContent.svelte"
 
   let show = false
   let pos = { x: 0, y: 0 }
@@ -25,12 +25,12 @@
 </script>
 
 {#if show}
-  <Menu {...pos} on:click={closeMenu} on:clickoutside={closeMenu}>
-    <slot>
-      <ul>
+  <ContextMenuContent {...pos} on:click={closeMenu} on:clickoutside={closeMenu}>
+    <ul on:click={closeMenu} on:keydown>
+      <slot>
         <li><button on:click={() => dispatch("cut")}>Cut</button></li>
         <li><button on:click={() => dispatch("paste")}>Paste</button></li>
-      </ul>
-    </slot>
-  </Menu>
+      </slot>
+    </ul>
+  </ContextMenuContent>
 {/if}

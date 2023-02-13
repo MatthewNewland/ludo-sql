@@ -1,7 +1,8 @@
 from __future__ import annotations
 from asyncio import TaskGroup
+from pathlib import Path
 from typing import Optional
-from sqlalchemy import ForeignKey, select
+from sqlalchemy import ForeignKey, select, inspect
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pydantic import BaseModel, Field
@@ -49,6 +50,17 @@ class Page(Base):
                 return True
 
         return False
+
+    async def get_path(self, session: AsyncSession) -> Path:
+        page = self
+        parts = []
+        while True:
+            parts.append(page.title)
+            if page.parent_id is None:
+                break
+            page = await session.get(Page, page.parent_id)
+        path = '/' / Path(*reversed(parts))
+        return path
 
 
 from ludo.auth import User

@@ -4,6 +4,7 @@
   import { clipboard } from "$lib/store/clipboard"
   import Dialog from "./Dialog.svelte"
   import ContextMenu from "./ContextMenu.svelte"
+  import MenuOption from "./MenuOption.svelte"
 
   let clazz: string = ""
   export { clazz as class }
@@ -29,11 +30,9 @@
 
   const handleContextMenuCut = () => {
     $clipboard.cutPage = menuPage
-    contextMenu.closeMenu()
   }
 
   const handleContextMenuPaste = () => {
-    contextMenu.closeMenu()
     if (!$clipboard.cutPage) {
       return
     }
@@ -92,13 +91,10 @@
   <p>Are you sure you want to delete this page?</p>
 </Dialog>
 
-<ContextMenu
-  bind:this={contextMenu}
-  on:cut={handleContextMenuCut}
-  on:paste={handleContextMenuPaste}
->
-  <ul>
-    <li><button on:click={handleContextMenuCut}>Cut</button></li>
-    <li><button on:click={handleContextMenuPaste}>Paste</button></li>
-  </ul>
+<ContextMenu bind:this={contextMenu}>
+  <MenuOption on:click={handleContextMenuCut}>Cut</MenuOption>
+  <MenuOption on:click={handleContextMenuPaste}>Paste</MenuOption>
+  <MenuOption href="/pages/new?parentId={menuPage.id}">New</MenuOption>
+  <MenuOption href="/pages/{menuPage.id}">Go to</MenuOption>
+  <MenuOption href="/pages/{menuPage.id}/edit">Edit</MenuOption>
 </ContextMenu>
