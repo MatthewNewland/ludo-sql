@@ -25,14 +25,13 @@ class Page(Base):
         sr = await session.scalars(select(Page).where(Page.parent_id == self.id))
         children = sr.all()
 
-        async def run_task(page: Page):
-            pwc.children.append(await page.with_descendants(session))
+        async def get_children(page: Page):
+            return await page.with_descendants(session)
 
         async with TaskGroup() as tg:
-            for child in children:
-                tg.create_task(run_task(child))
+            tasks = [tg.create_task(get_children(child)) for child in children]
 
-        pwc.children.sort(key=lambda pwc: pwc.id)
+        pwc.children = [task.result() for task in tasks]
         return pwc
 
     async def is_ancestor_of(self, page: Page, session: AsyncSession) -> bool:

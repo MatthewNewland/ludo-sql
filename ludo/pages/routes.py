@@ -52,21 +52,21 @@ class PagesController(Controller):
         user_for_session = await session.get(User, user.id)
         page = Page(**data.dict())
 
-        if await session.get(Page, parent_id) is None:
+        if parent_id is not None and await session.get(Page, parent_id) is None:
             raise HTTPException(
                 status_code=status_codes.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Parent ID does not exist"
             )
 
-        if page.title is None and page.friendly_title is None:
+        if not page.title and not page.friendly_title:
             raise HTTPException(
                 status_code=status_codes.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Must set either `title` or `friendly_title` in create request body.",
             )
 
-        if page.title is None and page.friendly_title is not None:
+        if not page.title and page.friendly_title:
             page.title = page.friendly_title.replace(" ", "-").replace(",", "").lower()
-        elif page.friendly_title is None and page.title is not None:
+        elif not page.friendly_title and page.title:
             page.friendly_title = page.title
 
         if parent_id is not None:
@@ -87,10 +87,10 @@ class PagesController(Controller):
         scalar_result = await session.scalars(stmt)
         root_pages = scalar_result.all()
 
-        result = await asyncio.gather(
-            *[page.with_descendants(session) for page in root_pages]
-        )
+        async with asyncio.TaskGroup() as tg:
+            tasks = [tg.create_task(page.with_descendants(session)) for page in root_pages]
 
+        result = [task.result() for task in tasks]
         return result
 
     @put("/move/{id:int}")
