@@ -96,4 +96,9 @@
   bind:this={contextMenu}
   on:cut={handleContextMenuCut}
   on:paste={handleContextMenuPaste}
-/>
+>
+  <ul>
+    <li><button on:click={handleContextMenuCut}>Cut</button></li>
+    <li><button on:click={handleContextMenuPaste}>Paste</button></li>
+  </ul>
+</ContextMenu>

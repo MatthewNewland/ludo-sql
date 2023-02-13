@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, setContext, createEventDispatcher } from "svelte"
+  import { setContext, createEventDispatcher } from "svelte"
   import { fade } from "svelte/transition"
   import { menuKey } from "./menu"
 
@@ -38,7 +38,7 @@
   transition:fade={{ duration: 100 }}
   bind:this={menuEl}
   style="top: {y}px; left: {x}px;"
-  class="fixed grid dark:bg-slate-800 w-40 px-4 py-2"
+  class="rounded fixed grid dark:bg-slate-800 w-40 px-4 py-2"
 >
   <slot />
 </div>
