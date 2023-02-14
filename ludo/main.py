@@ -1,4 +1,4 @@
-from starlite import Starlite, CacheConfig, CORSConfig, Provide
+from starlite import Starlite, CacheConfig, CORSConfig, LoggingConfig, Provide
 
 
 from .utils import PicklingCacheBackend
@@ -20,4 +20,12 @@ app = Starlite(
     cache_config=CacheConfig(
         backend=PicklingCacheBackend("persist.pickle"), expiration=60 * 60 * 24
     ),
+    logging_config=LoggingConfig(
+        loggers={
+            "ludo": {
+                "level": "INFO",
+                "handlers": ["queue_listener"]
+            }
+        }
+    )
 )

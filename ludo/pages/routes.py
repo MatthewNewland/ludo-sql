@@ -1,5 +1,6 @@
 import asyncio
 from pathlib import Path
+import logging
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,6 +27,9 @@ from .models import (
     PageVersionDTO,
     PageWithChildren,
 )
+
+
+logger = logging.getLogger()
 
 
 class PagesController(Controller):
@@ -130,7 +134,21 @@ class PagesController(Controller):
         return page_to_move
 
     @get("/{id:int}")
-    async def get_page(self, id: int, session: AsyncSession, user: User) -> PageOutDTO:
+    async def get_page(
+        self, id: int, session: AsyncSession, user: User, versions_back: int = 0
+    ) -> PageOutDTO:
+        if versions_back > 0:
+            result_scalars = await session.scalars(
+                select(PageVersion)
+                .where(PageVersion.page_id == id)
+                .order_by(PageVersion.created.desc())
+                .offset(versions_back - 1)
+            )
+            result = result_scalars.first()
+            if result is not None:
+                return result
+            logger.warning(f"Did not find version {versions_back} back from current")
+        # If version is not set, or is not accessible, fall back to current version.
         page = await session.get(Page, id)
         if page is None or page.author_id != user.id:
             raise NotFoundException()
