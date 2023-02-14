@@ -18,7 +18,14 @@ from starlite import (
 
 from ludo.auth import User
 
-from .models import Page, PageInDTO, PageOutDTO, PageWithChildren
+from .models import (
+    Page,
+    PageInDTO,
+    PageOutDTO,
+    PageVersion,
+    PageVersionDTO,
+    PageWithChildren,
+)
 
 
 class PagesController(Controller):
@@ -55,7 +62,7 @@ class PagesController(Controller):
         if parent_id is not None and await session.get(Page, parent_id) is None:
             raise HTTPException(
                 status_code=status_codes.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Parent ID does not exist"
+                detail="Parent ID does not exist",
             )
 
         if not page.title and not page.friendly_title:
@@ -88,7 +95,9 @@ class PagesController(Controller):
         root_pages = scalar_result.all()
 
         async with asyncio.TaskGroup() as tg:
-            tasks = [tg.create_task(page.with_descendants(session)) for page in root_pages]
+            tasks = [
+                tg.create_task(page.with_descendants(session)) for page in root_pages
+            ]
 
         result = [task.result() for task in tasks]
         return result
@@ -127,13 +136,22 @@ class PagesController(Controller):
             raise NotFoundException()
         return page
 
-    @patch("/{id:int}")
+    @put("/{id:int}")
     async def update_page(
-        self, id: int, data: Partial[PageInDTO], session: AsyncSession, user: User
+        self,
+        id: int,
+        data: Partial[PageInDTO],
+        session: AsyncSession,
+        user: User,
+        save_version: bool = False,
     ) -> PageOutDTO:
         page = await session.get(Page, id)
         if page is None or page.author_id != user.id:
             raise NotFoundException()
+
+        if save_version:
+            old_version = PageVersion.from_page(page)
+            session.add(old_version)
 
         for attr, val in data.dict(exclude_unset=True).items():
             setattr(page, attr, val)
@@ -143,8 +161,36 @@ class PagesController(Controller):
 
         return page
 
+    @get("/{id:int}/versions")
+    async def get_versions(
+        self, id: int, session: AsyncSession
+    ) -> list[PageVersionDTO]:
+        result = await session.scalars(
+            select(PageVersion)
+            .where(PageVersion.page_id == id)
+            .order_by(PageVersion.created.desc())
+        )
+        return result.all()
+
+    @delete("/{id:int}/versions/drop")
+    async def drop_versions(
+        self, id: int, session: AsyncSession, keep: int = 1
+    ) -> None:
+        result = await session.scalars(
+            select(PageVersion)
+            .where(PageVersion.page_id == id)
+            .order_by(PageVersion.created.desc())
+            .offset(keep)
+        )
+        for version in result.all():
+            await session.delete(version)
+
+        await session.commit()
+
     @delete("/{id:int}")
-    async def delete_page(self, id: int, session: AsyncSession, user: User, force: bool = False) -> None:
+    async def delete_page(
+        self, id: int, session: AsyncSession, user: User, force: bool = False
+    ) -> None:
         page = await session.get(Page, id)
         if page is None or page.author_id != user.id:
             raise NotFoundException()
@@ -154,8 +200,16 @@ class PagesController(Controller):
         if children.first() is not None and not force:
             raise HTTPException(
                 status_code=status_codes.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Attempting to delete page with children"
+                detail="Attempting to delete page with children",
             )
+
+        result = await session.scalars(
+            select(PageVersion).where(PageVersion.page_id == page.id)
+        )
+        versions_to_delete = result.all()
+
+        for version in versions_to_delete:
+            await session.delete(version)
 
         await session.delete(page)
         await session.commit()
@@ -187,3 +241,7 @@ class PagesController(Controller):
         if page is None:
             raise NotFoundException()
         return await page.get_path(session)
+
+
+class PageVersionController(Controller):
+    path = "/api/page_version"

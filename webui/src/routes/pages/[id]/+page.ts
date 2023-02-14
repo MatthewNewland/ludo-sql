@@ -9,11 +9,15 @@ export const load = (async ({ params }) => {
     content: ""
   }
 
+  let previousVersions: Page[] = []
+
   if (browser) {
     data = await apiClient.get(`${params.id}`).json<Page>()
+    previousVersions = await apiClient.get(`${params.id}/versions`).json<Page[]>()
   }
 
   return {
-    page: data
+    page: data,
+    previousVersions
   }
 }) satisfies PageLoad

@@ -6,7 +6,7 @@ body {
   @apply dark:bg-slate-900 dark:text-slate-50;
 }
 
-input[type]:not([type="checkbox"]), textarea {
+input[type]:not([type="checkbox"]), textarea, select {
   @apply dark:bg-slate-800 dark:text-slate-50 rounded;
 }
 

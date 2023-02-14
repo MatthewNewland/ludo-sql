@@ -1,5 +1,6 @@
 from __future__ import annotations
 from asyncio import TaskGroup
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from sqlalchemy import ForeignKey, select, inspect
@@ -25,11 +26,8 @@ class Page(Base):
         sr = await session.scalars(select(Page).where(Page.parent_id == self.id))
         children = sr.all()
 
-        async def get_children(page: Page):
-            return await page.with_descendants(session)
-
         async with TaskGroup() as tg:
-            tasks = [tg.create_task(get_children(child)) for child in children]
+            tasks = [tg.create_task(child.with_descendants(session)) for child in children]
 
         pwc.children = [task.result() for task in tasks]
         return pwc
@@ -63,6 +61,29 @@ class Page(Base):
 
 
 from ludo.auth import User
+
+
+class PageVersion(Base):
+    __tablename__ = "page_version"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+    friendly_title: Mapped[str]
+    content: Mapped[str]
+    page_id: Mapped[int] = mapped_column(ForeignKey("page.id"))
+    created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    @classmethod
+    def from_page(cls, page: Page) -> PageVersion:
+        page_version = PageVersion(
+            title=page.title,
+            friendly_title=page.friendly_title,
+            content=page.content,
+            page_id=page.id
+        )
+        return page_version
+
+
+PageVersionDTO = dto_factory("PageVersionDTO", PageVersion)
 
 
 PageInDTO = dto_factory("PageInDTO", Page, exclude=["id", "author_id", "author"])
