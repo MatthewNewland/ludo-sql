@@ -5,11 +5,12 @@ from .utils import PicklingCacheBackend
 from .db import db_on_startup, sqlalchemy_plugin
 from .auth import auth_router, jwt_cookie_auth, current_active_user
 from .pages.routes import PagesController
+from .assets.routes import AssetController
 
 
 app = Starlite(
     debug=True,
-    route_handlers=[auth_router, PagesController],
+    route_handlers=[auth_router, PagesController, AssetController],
     on_startup=[db_on_startup],
     on_app_init=[jwt_cookie_auth.on_app_init],
     plugins=[sqlalchemy_plugin],
